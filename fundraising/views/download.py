@@ -5,9 +5,43 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import FileResponse, Http404
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 from ..models import GeneratedDataset
 import os
 
+@extend_schema(
+    tags=['datasets'],
+    description='Download generated dataset files (transactions or contacts)',
+    parameters=[
+        OpenApiParameter(
+            name='type',
+            type=str,
+            location=OpenApiParameter.QUERY,
+            description='Type of file to download',
+            required=True,
+            enum=['transactions', 'contacts'],
+            examples=[
+                OpenApiExample(
+                    'Transactions',
+                    value='transactions',
+                    description='Download transactions CSV file'
+                ),
+                OpenApiExample(
+                    'Contacts',
+                    value='contacts',
+                    description='Download contacts CSV file'
+                ),
+            ]
+        ),
+    ],
+    responses={
+        200: OpenApiTypes.BINARY,
+        400: OpenApiTypes.OBJECT,
+        403: OpenApiTypes.OBJECT,
+        404: OpenApiTypes.OBJECT
+    }
+)
 class DownloadDatasetView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -19,7 +53,7 @@ class DownloadDatasetView(APIView):
             if dataset.configuration.created_by != request.user:
                 raise PermissionDenied('You do not have permission to download this dataset')
             
-            # Get file type from query params (transactions or contacts)
+            # Get file type from query params
             file_type = request.query_params.get('type', 'transactions')
             
             if file_type == 'transactions':
@@ -34,28 +68,21 @@ class DownloadDatasetView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Check if file exists
             if not os.path.exists(file_path):
                 return Response(
                     {'error': 'File not found'},
                     status=status.HTTP_404_NOT_FOUND
                 )
             
-            # Increment download count
             dataset.download_count += 1
             dataset.save()
             
-            # Return file as response
             response = FileResponse(
                 open(file_path, 'rb'),
                 as_attachment=True,
                 filename=filename
             )
-            
-            # Add appropriate headers
             response['Content-Type'] = 'text/csv'
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            
             return response
             
         except GeneratedDataset.DoesNotExist:
@@ -66,6 +93,15 @@ class DownloadDatasetView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+@extend_schema(
+    tags=['datasets'],
+    description='Get dataset generation status and metadata',
+    responses={
+        200: OpenApiTypes.OBJECT,
+        403: OpenApiTypes.OBJECT,
+        404: OpenApiTypes.OBJECT
+    }
+)
 class DatasetStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -73,7 +109,6 @@ class DatasetStatusView(APIView):
         try:
             dataset = GeneratedDataset.objects.select_related('configuration').get(pk=dataset_id)
             
-            # Check if the user owns this dataset
             if dataset.configuration.created_by != request.user:
                 raise PermissionDenied('You do not have permission to access this dataset')
             
