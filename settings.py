@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'fundraising_data',
+    'fundraising',
 ]
 
 MIDDLEWARE = [
@@ -57,11 +57,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3')
 DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=not DEBUG,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
