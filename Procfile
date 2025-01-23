@@ -1,1 +1,1 @@
-web: gunicorn BackendFundraisingDataSetGenerator.wsgi --log-file -
+web: gunicorn config.wsgi --log-file -
