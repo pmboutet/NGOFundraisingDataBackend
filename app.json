@@ -1,0 +1,22 @@
+{
+  "name": "NGO Fundraising Data Backend",
+  "description": "Django REST API for generating synthetic fundraising data",
+  "repository": "https://github.com/pmboutet/NGOFundraisingDataBackend",
+  "keywords": ["django", "rest", "api"],
+  "addons": ["heroku-postgresql:hobby-dev"],
+  "env": {
+    "DJANGO_SECRET_KEY": {
+      "description": "Django secret key",
+      "generator": "secret"
+    },
+    "DJANGO_DEBUG": {
+      "description": "Django debug mode",
+      "value": "False"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
