@@ -3,7 +3,7 @@ import dj_database_url
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = False
-ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '.herokuapp.com')]
+ALLOWED_HOSTS = ['backendfundraisingdata-c936fae054fd.herokuapp.com']
 
 DATABASES = {
     'default': dj_database_url.config(conn_max_age=600)
@@ -26,5 +26,13 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+CORS_ALLOWED_ORIGINS = [
+    'https://backendfundraisingdata-c936fae054fd.herokuapp.com'
+]
 CORS_ALLOW_CREDENTIALS = True
+
+# Static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_DIRS = []
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
