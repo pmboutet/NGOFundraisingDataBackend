@@ -1,50 +1,42 @@
 # NGO Fundraising Data Generator
 
-API REST Django pour générer des données de collecte de fonds synthétiques basées sur des configurations YAML.
+Django REST API for generating synthetic fundraising data based on YAML configurations.
 
-## Installation locale
+## Local Installation
 
-1. Cloner le repo
 ```bash
+# Clone repo
 git clone https://github.com/pmboutet/NGOFundraisingDataBackend.git
 cd NGOFundraisingDataBackend
-```
 
-2. Créer un environnement virtuel
-```bash
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# ou
+# or
 venv\Scripts\activate  # Windows
-```
 
-3. Installer les dépendances
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-4. Lancer les migrations
-```bash
+# Run migrations
 python manage.py migrate
-```
 
-5. Démarrer le serveur
-```bash
+# Start server
 python manage.py runserver
 ```
 
-L'API sera disponible sur `http://localhost:8000`
+API available at `http://localhost:8000`
 
-## Configuration des environnements
+## Environment Configuration
 
-### Développement (par défaut)
-- Debug activé
-- Base de données SQLite
-- Emails en console
-- Configuration dans `config/settings/development.py`
+### Development (default)
+- Debug enabled
+- SQLite database
+- Console emails
+- Configuration in `config/settings/development.py`
 
 ### Production
-Définir les variables d'environnement suivantes:
+Set environment variables:
 ```bash
 export DJANGO_SETTINGS_MODULE=config.settings.production
 export DJANGO_SECRET_KEY=your-secret-key
@@ -54,37 +46,60 @@ export EMAIL_HOST_USER=user@example.com
 export EMAIL_HOST_PASSWORD=password
 ```
 
-## Endpoints API
+## API Endpoints
 
-- `/api/generate/` - POST - Génère un dataset basé sur la configuration YAML
-- `/api/docs/` - GET - Documentation Swagger de l'API
+- `/api/generate/` - POST - Generate dataset from YAML config
+- `/api/docs/` - GET - Swagger API documentation
+
+## Basic Usage
+
+1. Generate dataset using a YAML config:
+```python
+import requests
+
+config = """
+config:
+  donors: 100
+  timeframe:
+    start: 2023-01-01
+    end: 2023-12-31
+  donation_types:
+    - name: one_time
+      weight: 70
+      amount_range: [10, 1000]
+    - name: monthly
+      weight: 30
+      amount_range: [5, 100]
+"""
+
+response = requests.post(
+    'http://localhost:8000/api/generate/',
+    json={'config': config}
+)
+
+data = response.json()
+print(data)
+```
 
 ## Tests
 
-Pour lancer les tests:
 ```bash
 python manage.py test
 ```
 
-## Déploiement Heroku
+## Heroku Deployment
 
-1. Créer une application Heroku
 ```bash
+# Create app
 heroku create
-```
 
-2. Configurer les variables d'environnement
-```bash
+# Configure environment
 heroku config:set DJANGO_SETTINGS_MODULE=config.settings.production
 heroku config:set DJANGO_SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
-```
 
-3. Déployer
-```bash
+# Deploy
 git push heroku main
-```
 
-4. Lancer les migrations
-```bash
+# Run migrations
 heroku run python manage.py migrate
 ```
