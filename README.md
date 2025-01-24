@@ -35,25 +35,56 @@ python manage.py runserver
 
 L'API sera disponible sur `http://localhost:8000`
 
+## Configuration des environnements
+
+### Développement (par défaut)
+- Debug activé
+- Base de données SQLite
+- Emails en console
+- Configuration dans `config/settings/development.py`
+
+### Production
+Définir les variables d'environnement suivantes:
+```bash
+export DJANGO_SETTINGS_MODULE=config.settings.production
+export DJANGO_SECRET_KEY=your-secret-key
+export DATABASE_URL=postgresql://...
+export EMAIL_HOST=smtp.example.com
+export EMAIL_HOST_USER=user@example.com
+export EMAIL_HOST_PASSWORD=password
+```
+
 ## Endpoints API
 
 - `/api/generate/` - POST - Génère un dataset basé sur la configuration YAML
-
-## Documentation API
-
-La documentation Swagger est disponible sur `/api/docs/`
-
-## Déploiement
-
-L'application est configurée pour Heroku. Pour le déploiement:
-
-1. Créer une application Heroku
-2. Configurer les variables d'environnement
-3. Déployer via Git
+- `/api/docs/` - GET - Documentation Swagger de l'API
 
 ## Tests
 
 Pour lancer les tests:
 ```bash
 python manage.py test
+```
+
+## Déploiement Heroku
+
+1. Créer une application Heroku
+```bash
+heroku create
+```
+
+2. Configurer les variables d'environnement
+```bash
+heroku config:set DJANGO_SETTINGS_MODULE=config.settings.production
+heroku config:set DJANGO_SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+```
+
+3. Déployer
+```bash
+git push heroku main
+```
+
+4. Lancer les migrations
+```bash
+heroku run python manage.py migrate
 ```
